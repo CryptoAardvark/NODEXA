@@ -81,6 +81,9 @@ public:
     const CCheckpointData& Checkpoints() const { return checkpointData; }
     const ChainTxData& TxData() const { return chainTxData; }
     void UpdateVersionBitsParameters(Consensus::DeploymentPos d, int64_t nStartTime, int64_t nTimeout);
+    //Return EquihashN, EquihashK
+    unsigned int EquihashN() const { return nEquihashN; }
+    unsigned int EquihashK() const { return nEquihashK; }
     void TurnOffSegwit();
     void TurnOffCSV();
     void TurnOffBIP34();
@@ -156,7 +159,9 @@ protected:
     bool fMiningRequiresPeers;
     CCheckpointData checkpointData;
     ChainTxData chainTxData;
-
+    //Set N, K in Equihash
+    unsigned int nEquihashN = 255;
+    unsigned int nEquihashK = 11;
     /** CLORE Start **/
     // Burn Amounts
     CAmount nIssueAssetBurnAmount;

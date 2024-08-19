@@ -14,6 +14,11 @@
 #include "validation.h"
 #include "chainparams.h"
 #include "tinyformat.h"
+#include "streams.h"
+#include "crypto/equihash.h"
+
+#include "algorithm"
+#include "iostream"
 
 unsigned int static DarkGravityWave(const CBlockIndex* pindexLast, const CBlockHeader *pblock, const Consensus::Params& params) {
     /* current difficulty formula, dash - DarkGravity v3, written by Evan Duffield - evan@dash.org */
@@ -197,8 +202,28 @@ unsigned int CalculateNextWorkRequired(const CBlockIndex* pindexLast, int64_t nF
 }
 
 //Check equihash solution
-bool CheckEquihashSolution(){
-    
+bool CheckEquihashSolution(const CBlockHeader *pblock, const CChainParams& param){
+    int height = pblock->nHeight;
+    unsigned int n = params.EquihashN(height);
+    unsigned int k = params.EquihashK(height);
+
+    // Hash state
+    blake2b_state state;
+    EhInitialiseState(n, k, state, params.EquihashUseBTGSalt(height));
+
+    // I = the block header minus nonce and solution.
+    CEquihashInput I{*pblock};
+    // I||V
+    CDataStream ss(SER_NETWORK, PROTOCOL_VERSION);
+    ss << I;
+    ss << pblock->nNonce;
+
+    // H(I||V||...
+    blake2b_update(&state, (unsigned char*)&ss[0], ss.size());
+
+    bool isValid;
+    EhIsValidSolution(n, k, state, pblock->nSolution, isValid);
+    return isValid;
 }
 
 bool CheckProofOfWork(uint256 hash, unsigned int nBits, const Consensus::Params& params)
