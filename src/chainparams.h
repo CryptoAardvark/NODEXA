@@ -19,7 +19,7 @@
 struct CDNSSeedData {
     std::string host;
     bool supportsServiceBitsFiltering;
-    CDNSSeedData(const std::string &strHost, bool supportsServiceBitsFilteringIn) : host(strHost), supportsServiceBitsFiltering(supportsServiceBitsFilteringIn) {}
+    CDNSSeedData(const std::string& strHost, bool supportsServiceBitsFilteringIn) : host(strHost), supportsServiceBitsFiltering(supportsServiceBitsFilteringIn) {}
 };
 
 struct SeedSpec6 {
@@ -63,7 +63,7 @@ public:
     const CMessageHeader::MessageStartChars& MessageStart() const { return pchMessageStart; }
     int GetDefaultPort() const { return nDefaultPort; }
 
-    bool MiningRequiresPeers() const {return fMiningRequiresPeers; }
+    bool MiningRequiresPeers() const { return fMiningRequiresPeers; }
     const CBlock& GenesisBlock() const { return genesis; }
     /** Default value for -checkmempool and -checkblockindex argument */
     bool DefaultConsistencyChecks() const { return fDefaultConsistencyChecks; }
@@ -116,21 +116,10 @@ public:
     const std::string& CommunityAutonomousAddress() const { return strCommunityAutonomousAddress; }
 
     //  Indicates whether or not the provided address is a burn address
-    bool IsBurnAddress(const std::string & p_address) const
+    bool IsBurnAddress(const std::string& p_address) const
     {
         if (
-            p_address == strIssueAssetBurnAddress
-            || p_address == strReissueAssetBurnAddress
-            || p_address == strIssueSubAssetBurnAddress
-            || p_address == strIssueUniqueAssetBurnAddress
-            || p_address == strIssueMsgChannelAssetBurnAddress
-            || p_address == strIssueQualifierAssetBurnAddress
-            || p_address == strIssueSubQualifierAssetBurnAddress
-            || p_address == strIssueRestrictedAssetBurnAddress
-            || p_address == strAddNullQualifierTagBurnAddress
-            || p_address == strGlobalBurnAddress
-            || p_address == strCommunityAutonomousAddress
-        ) {
+            p_address == strIssueAssetBurnAddress || p_address == strReissueAssetBurnAddress || p_address == strIssueSubAssetBurnAddress || p_address == strIssueUniqueAssetBurnAddress || p_address == strIssueMsgChannelAssetBurnAddress || p_address == strIssueQualifierAssetBurnAddress || p_address == strIssueSubQualifierAssetBurnAddress || p_address == strIssueRestrictedAssetBurnAddress || p_address == strAddNullQualifierTagBurnAddress || p_address == strGlobalBurnAddress || p_address == strCommunityAutonomousAddress) {
             return true;
         }
 
@@ -194,8 +183,8 @@ protected:
 
     // Global Burn Address
     std::string strGlobalBurnAddress;
-	
-	//Community Autonomous Address   
+
+    // Community Autonomous Address
     std::string strCommunityAutonomousAddress;
 
     unsigned int nDGWActivationBlock;
@@ -209,6 +198,11 @@ protected:
     int nAssetActivationHeight;
 
     uint32_t nKAAAWWWPOWActivationTime;
+
+    // Switch height convert from KawPoW to Equihash
+    unsigned int nEquihashActivationHeight;
+    unsigned int nEQQUUihashActivationHeight;
+
     /** CLORE End **/
 };
 
@@ -223,7 +217,7 @@ std::unique_ptr<CChainParams> CreateChainParams(const std::string& chain);
  * Return the currently selected parameters. This won't change after app
  * startup, except for unit tests.
  */
-const CChainParams &GetParams();
+const CChainParams& GetParams();
 
 /**
  * Sets the params returned by Params() to those for the given BIP70 chain name.

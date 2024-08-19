@@ -22,7 +22,7 @@ unsigned int static DarkGravityWave(const CBlockIndex* pindexLast, const CBlockH
     unsigned int nProofOfWorkLimit = UintToArith256(params.powLimit).GetCompact();
     const arith_uint256 bnPowLimit = UintToArith256(params.powLimit);
     int64_t nPastBlocks = 180; // ~3hr
-
+         
     // make sure we have at least (nPastBlocks + 1) blocks, otherwise just return powLimit
     if (!pindexLast || pindexLast->nHeight < nPastBlocks) {
         return bnPowLimit.GetCompact();
@@ -48,6 +48,9 @@ unsigned int static DarkGravityWave(const CBlockIndex* pindexLast, const CBlockH
     arith_uint256 bnPastTargetAvg;
 
     int nKAWPOWBlocksFound = 0;
+    int nEquihashBlocksFound = 0; // Counter of Equihash blocks
+
+
     for (unsigned int nCountBlocks = 1; nCountBlocks <= nPastBlocks; nCountBlocks++) {
         arith_uint256 bnTarget = arith_uint256().SetCompact(pindex->nBits);
         if (nCountBlocks == 1) {
@@ -58,24 +61,39 @@ unsigned int static DarkGravityWave(const CBlockIndex* pindexLast, const CBlockH
         }
 
         // Count how blocks are KAWPOW mined in the last 180 blocks
-        if (pindex->nTime >= nKAWPOWActivationTime) {
+        if (pindex->nTime >= nKAWPOWActivationTime && pindex->nHeight < nEquihashActivationHeight) {
             nKAWPOWBlocksFound++;
         }
 
-        if(nCountBlocks != nPastBlocks) {
+        //Count how blocks are Equihash mined in the last 180 blocks
+        if (pindex->nHeight >= nEquihashActivationHeight){
+            nEquihashBlocksFound++;
+        }
+
+        int amind;
+        if (nCountBlocks != nPastBlocks) {
             assert(pindex->pprev); // should never fail
             pindex = pindex->pprev;
         }
+
     }
 
     // If we are mining a KAWPOW block. We check to see if we have mined
     // 180 KAWPOW blocks already. If we haven't we are going to return our
     // temp limit. This will allow us to change algos to kawpow without having to
     // change the DGW math.
-    if (pblock->nTime >= nKAWPOWActivationTime) {
+    //Handle KAWPOW difficulty adjustment
+    if (pblock->nTime >= nKAWPOWActivationTime && pblock->nHeight < nEquihashActivationHeight) {
         if (nKAWPOWBlocksFound != nPastBlocks) {
             const arith_uint256 bnKawPowLimit = UintToArith256(params.kawpowLimit);
             return bnKawPowLimit.GetCompact();
+        }
+    }
+    //Handle Equihash difficulty adjustment
+    if (pblock->nHeight >= nEquihashActivationHeight){
+        if (nEquihashBlocksFound != nPastBlocks) {
+            const arith_uint256 bnEquihashLimit = UintToArith256(params.equihashLimit);
+            return bnEquihashLimit.GetCompact();
         }
     }
 
