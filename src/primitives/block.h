@@ -50,6 +50,12 @@ public:
     uint64_t nNonce64;
     uint256 mix_hash;
 
+    //Equihash data
+    enum : size_t { HEADER_SIZE = 4 + 32 + 32 + 32 + 4 + 4 + 32 }; // excluding Equihash solution
+    enum : int32_t { CURRENT_VERSION = 4 };
+    uint256 hashBlockCommitments;
+    std::vector<unsigned char> nSolution;
+
     CBlockHeader()
     {
         SetNull();
@@ -241,6 +247,7 @@ public:
         CBlockHeader::SetNull();
         *((CBlockHeader*)this) = header;
     }
+
     ADD_SERIALIZE_METHODS;
 
     template <typename Stream, typename Operation>
@@ -249,21 +256,9 @@ public:
         READWRITE(this->nVersion);
         READWRITE(hashPrevBlock);
         READWRITE(hashMerkleRoot);
+        READWRITE(hashBlockCommitments);
         READWRITE(nTime);
         READWRITE(nBits);
-        READWRITE(nHeight);
-    }
-    SERIALIZE_METHODS(CEquihashInput, obj)
-    {
-        READWRITE(obj.nVersion);
-        READWRITE(obj.hashPrevBlock);
-        READWRITE(obj.hashMerkleRoot);
-        READWRITE(obj.nHeight);
-        for (size_t i = 0; i < (sizeof(nReserved) / sizeof(nReserved[0])); i++) {
-            READWRITE(obj.nReserved[i]);
-        }
-        READWRITE(obj.nTime);
-        READWRITE(obj.nBits);
     }
 };
 
