@@ -84,6 +84,11 @@ public:
     //Return EquihashN, EquihashK
     unsigned int EquihashN() const { return nEquihashN; }
     unsigned int EquihashK() const { return nEquihashK; }
+    //Return Equihash
+    bool EquihashUseBTGSalt(int height) const
+    {
+        return height >= nEquihashActivationHeight;
+    }
     void TurnOffSegwit();
     void TurnOffCSV();
     void TurnOffBIP34();

@@ -232,4 +232,39 @@ public:
     }
 };
 
+//Add EquihashInput class
+class CEquihashInput : private CBlockHeader
+{
+public:
+    CEquihashInput(const CBlockHeader& header)
+    {
+        CBlockHeader::SetNull();
+        *((CBlockHeader*)this) = header;
+    }
+    ADD_SERIALIZE_METHODS;
+
+    template <typename Stream, typename Operation>
+    inline void SerializationOp(Stream& s, Operation ser_action)
+    {
+        READWRITE(this->nVersion);
+        READWRITE(hashPrevBlock);
+        READWRITE(hashMerkleRoot);
+        READWRITE(nTime);
+        READWRITE(nBits);
+        READWRITE(nHeight);
+    }
+    SERIALIZE_METHODS(CEquihashInput, obj)
+    {
+        READWRITE(obj.nVersion);
+        READWRITE(obj.hashPrevBlock);
+        READWRITE(obj.hashMerkleRoot);
+        READWRITE(obj.nHeight);
+        for (size_t i = 0; i < (sizeof(nReserved) / sizeof(nReserved[0])); i++) {
+            READWRITE(obj.nReserved[i]);
+        }
+        READWRITE(obj.nTime);
+        READWRITE(obj.nBits);
+    }
+};
+
 #endif // CLORE_PRIMITIVES_BLOCK_H

@@ -204,8 +204,8 @@ unsigned int CalculateNextWorkRequired(const CBlockIndex* pindexLast, int64_t nF
 //Check equihash solution
 bool CheckEquihashSolution(const CBlockHeader *pblock, const CChainParams& param){
     int height = pblock->nHeight;
-    unsigned int n = params.EquihashN(height);
-    unsigned int k = params.EquihashK(height);
+    unsigned int n = params.EquihashN();
+    unsigned int k = params.EquihashK();
 
     // Hash state
     blake2b_state state;
@@ -224,6 +224,14 @@ bool CheckEquihashSolution(const CBlockHeader *pblock, const CChainParams& param
     bool isValid;
     EhIsValidSolution(n, k, state, pblock->nSolution, isValid);
     return isValid;
+}
+
+//Check KawPow solution
+bool CheckKawpowSolution(const CBlockHeader& block, CValidationState& state, const Consensus::Params& consensusParams, bool fCheckPOW = true)
+{
+    bool is_vailid = true;
+    is_vailid = CheckBlockHeader(block, state, consensusParams, fCheckPOW);
+    return is_vailid;
 }
 
 bool CheckProofOfWork(uint256 hash, unsigned int nBits, const Consensus::Params& params)
