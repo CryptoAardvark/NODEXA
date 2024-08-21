@@ -36,7 +36,6 @@ extern BlockNetwork bNetwork;
 class CBlockHeader
 {
 public:
-
     // header
     int32_t nVersion;
     uint256 hashPrevBlock;
@@ -45,12 +44,12 @@ public:
     uint32_t nBits;
     uint32_t nNonce;
 
-    //KAAAWWWPOW data
+    // KAAAWWWPOW data
     uint32_t nHeight;
     uint64_t nNonce64;
     uint256 mix_hash;
 
-    //Equihash data
+    // Equihash data
     enum : size_t { HEADER_SIZE = 4 + 32 + 32 + 32 + 4 + 4 + 32 }; // excluding Equihash solution
     enum : int32_t { CURRENT_VERSION = 4 };
     uint256 hashBlockCommitments;
@@ -64,7 +63,8 @@ public:
     ADD_SERIALIZE_METHODS;
 
     template <typename Stream, typename Operation>
-    inline void SerializationOp(Stream& s, Operation ser_action) {
+    inline void SerializationOp(Stream& s, Operation ser_action)
+    {
         READWRITE(this->nVersion);
         READWRITE(hashPrevBlock);
         READWRITE(hashMerkleRoot);
@@ -77,6 +77,8 @@ public:
             READWRITE(nNonce64);
             READWRITE(mix_hash);
         }
+        READWRITE(hashBlockCommitments);
+        READWRITE(nSolution);
     }
 
     void SetNull()
@@ -91,6 +93,8 @@ public:
         nNonce64 = 0;
         nHeight = 0;
         mix_hash.SetNull();
+        hashBlockCommitments.SetNull();
+        nSolution.clear()
     }
 
     bool IsNull() const
@@ -133,7 +137,7 @@ public:
         SetNull();
     }
 
-    CBlock(const CBlockHeader &header)
+    CBlock(const CBlockHeader& header)
     {
         SetNull();
         *((CBlockHeader*)this) = header;
@@ -142,7 +146,8 @@ public:
     ADD_SERIALIZE_METHODS;
 
     template <typename Stream, typename Operation>
-    inline void SerializationOp(Stream& s, Operation ser_action) {
+    inline void SerializationOp(Stream& s, Operation ser_action)
+    {
         READWRITE(*(CBlockHeader*)this);
         READWRITE(vtx);
     }
@@ -157,23 +162,23 @@ public:
     CBlockHeader GetBlockHeader() const
     {
         CBlockHeader block;
-        block.nVersion       = nVersion;
-        block.hashPrevBlock  = hashPrevBlock;
+        block.nVersion = nVersion;
+        block.hashPrevBlock = hashPrevBlock;
         block.hashMerkleRoot = hashMerkleRoot;
-        block.nTime          = nTime;
-        block.nBits          = nBits;
-        block.nNonce         = nNonce;
+        block.nTime = nTime;
+        block.nBits = nBits;
+        block.nNonce = nNonce;
 
         // KAWPOW
-        block.nHeight        = nHeight;
-        block.nNonce64       = nNonce64;
-        block.mix_hash       = mix_hash;
-        //Eqihash
+        block.nHeight = nHeight;
+        block.nNonce64 = nNonce64;
+        block.mix_hash = mix_hash;
+        // Eqihash
         block.hashBlockCommitments = hashBlockCommitments;
         return block;
     }
 
-    // void SetPrevBlockHash(uint256 prevHash) 
+    // void SetPrevBlockHash(uint256 prevHash)
     // {
     //     block.hashPrevBlock = prevHash;
     // }
@@ -185,8 +190,7 @@ public:
  * other node doesn't have the same branch, it can find a recent common trunk.
  * The further back it is, the further before the fork it may be.
  */
-struct CBlockLocator
-{
+struct CBlockLocator {
     std::vector<uint256> vHave;
 
     CBlockLocator() {}
@@ -196,7 +200,8 @@ struct CBlockLocator
     ADD_SERIALIZE_METHODS;
 
     template <typename Stream, typename Operation>
-    inline void SerializationOp(Stream& s, Operation ser_action) {
+    inline void SerializationOp(Stream& s, Operation ser_action)
+    {
         int nVersion = s.GetVersion();
         if (!(s.GetType() & SER_GETHASH))
             READWRITE(nVersion);
@@ -221,7 +226,7 @@ struct CBlockLocator
 class CKAWPOWInput : private CBlockHeader
 {
 public:
-    CKAWPOWInput(const CBlockHeader &header)
+    CKAWPOWInput(const CBlockHeader& header)
     {
         CBlockHeader::SetNull();
         *((CBlockHeader*)this) = header;
@@ -230,7 +235,8 @@ public:
     ADD_SERIALIZE_METHODS;
 
     template <typename Stream, typename Operation>
-    inline void SerializationOp(Stream& s, Operation ser_action) {
+    inline void SerializationOp(Stream& s, Operation ser_action)
+    {
         READWRITE(this->nVersion);
         READWRITE(hashPrevBlock);
         READWRITE(hashMerkleRoot);
@@ -240,7 +246,7 @@ public:
     }
 };
 
-//Add EquihashInput class
+// Add EquihashInput class
 class CEquihashInput : private CBlockHeader
 {
 public:
