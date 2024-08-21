@@ -209,7 +209,7 @@ bool CheckEquihashSolution(const CBlockHeader *pblock, const CChainParams& param
 
     // Hash state
     blake2b_state state;
-    EhInitialiseState(n, k, state, params.EquihashUseBTGSalt(height));
+    EhInitialiseState(n, k, state, params.IsEquihashActive(height));
 
     // I = the block header minus nonce and solution.
     CEquihashInput I{*pblock};

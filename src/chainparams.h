@@ -85,7 +85,7 @@ public:
     unsigned int EquihashN() const { return nEquihashN; }
     unsigned int EquihashK() const { return nEquihashK; }
     //Return Equihash
-    bool EquihashUseBTGSalt(int height) const
+    bool IsEquihashActive(int height) const
     {
         return height >= nEquihashActivationHeight;
     }
