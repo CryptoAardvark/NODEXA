@@ -272,8 +272,8 @@ public:
         nKAWPOWActivationTime = nKAAAWWWPOWActivationTime;
 
         // set switch height
-        nEQQUUihashActivationHeight = 3000;
-        nEquihashActivationHeight = nEQQUUihashActivationHeight;
+        nEQIhashActivationHeight = 3000;
+        nEquihashActivationHeight = nEQIhashActivationHeight;
         // todo add
     }
 };
@@ -433,8 +433,8 @@ public:
         nKAWPOWActivationTime = nKAAAWWWPOWActivationTime;
 
         // set switch height
-        nEQQUUihashActivationHeight = 3000;
-        nEquihashActivationHeight = nEQQUUihashActivationHeight;
+        nEQIhashActivationHeight = 3000;
+        nEquihashActivationHeight = nEQIhashActivationHeight;
         // todo add
         /** CLORE_BLOCKCHAIN End **/
     }
@@ -588,8 +588,8 @@ public:
         nKAWPOWActivationTime = nKAAAWWWPOWActivationTime;
 
         // set switch height
-        nEQQUUihashActivationHeight = 9000;
-        nEquihashActivationHeight = nEQQUUihashActivationHeight;
+        nEQIhashActivationHeight = 9000;
+        nEquihashActivationHeight = nEQIhashActivationHeight;
         // todo add
         /** CLORE_BLOCKCHAIN End **/
     }

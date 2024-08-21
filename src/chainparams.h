@@ -211,7 +211,7 @@ protected:
 
     // Switch height convert from KawPoW to Equihash
     unsigned int nEquihashActivationHeight;
-    unsigned int nEQQUUihashActivationHeight;
+    unsigned int nEQIhashActivationHeight;
 
     /** CLORE End **/
 };

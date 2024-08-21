@@ -168,6 +168,8 @@ public:
         block.nHeight        = nHeight;
         block.nNonce64       = nNonce64;
         block.mix_hash       = mix_hash;
+        //Eqihash
+        block.hashBlockCommitments = hashBlockCommitments;
         return block;
     }
 
