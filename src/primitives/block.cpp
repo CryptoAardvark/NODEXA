@@ -10,6 +10,7 @@
 #include "tinyformat.h"
 #include "utilstrencodings.h"
 #include "crypto/common.h"
+#include "crypto/equihash.h"
 
 
 static const uint32_t MAINNET_X16RV2ACTIVATIONTIME = 1569945600;
@@ -17,6 +18,7 @@ static const uint32_t TESTNET_X16RV2ACTIVATIONTIME = 1567533600;
 static const uint32_t REGTEST_X16RV2ACTIVATIONTIME = 1569931200;
 
 uint32_t nKAWPOWActivationTime;
+unsigned int nEquihashActivationHeight;
 
 BlockNetwork bNetwork = BlockNetwork();
 
@@ -49,7 +51,7 @@ uint256 CBlockHeader::GetHash() const
         }
 
         return HashX16R(BEGIN(nVersion), END(nNonce), hashPrevBlock);
-    } else {
+    } else if(nHeight < nEquihashActivationHeight) {
         return KAWPOWHash_OnlyMix(*this);
     }
 }

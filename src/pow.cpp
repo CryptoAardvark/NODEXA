@@ -16,6 +16,7 @@
 #include "tinyformat.h"
 #include "streams.h"
 #include "crypto/equihash.h"
+#include "blake2b.h"
 
 #include "algorithm"
 #include "iostream"
@@ -216,7 +217,7 @@ bool CheckEquihashSolution(const CBlockHeader *pblock, const CChainParams& param
     // I||V
     CDataStream ss(SER_NETWORK, PROTOCOL_VERSION);
     ss << I;
-    ss << pblock->nNonce;
+    ss << pblock->nNonce64;
 
     // H(I||V||...
     blake2b_update(&state, (unsigned char*)&ss[0], ss.size());

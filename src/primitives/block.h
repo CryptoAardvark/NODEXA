@@ -20,6 +20,7 @@
  */
 
 extern uint32_t nKAWPOWActivationTime;
+extern unsigned int nEquihashActivationHeight;
 
 class BlockNetwork
 {
