@@ -104,6 +104,7 @@ public:
 
     inline bool IndicesBefore(const FullStepRow<WIDTH>& a, size_t len, size_t lenIndices) const { return memcmp(hash+len, a.hash+len, lenIndices) < 0; }
     std::vector<unsigned char> GetIndices(size_t len, size_t lenIndices,
+
                                           size_t cBitLen) const;
 
     template<size_t W>
