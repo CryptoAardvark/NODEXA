@@ -73,7 +73,7 @@ uint256 CBlockHeader::GetHashFull(uint256& mix_hash) const
     } else if (nHeight < nEquihashActivationHeight) {
         return KAWPOWHash(*this, mix_hash);
     } else if (nHeight >= nEquihashActivationHeight) {
-        return 
+        return this->GetEquihashHeaderHash();
     }
 }
 

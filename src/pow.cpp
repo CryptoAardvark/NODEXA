@@ -16,7 +16,7 @@
 #include "tinyformat.h"
 #include "streams.h"
 #include "crypto/equihash.h"
-#include "blake2b.h"
+#include "crypto/blake/blake2.h"
 
 #include "algorithm"
 #include "iostream"

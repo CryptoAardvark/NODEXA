@@ -93,7 +93,7 @@ public:
         nNonce64 = 0;
         nHeight = 0;
         mix_hash.SetNull();
-        nSolution.clear()
+        nSolution.clear();
     }
 
     bool IsNull() const
@@ -107,6 +107,7 @@ public:
 
     uint256 GetHashFull(uint256& mix_hash) const;
     uint256 GetKAWPOWHeaderHash() const;
+    uint256 GetEquihashHeaderHash() const;
     std::string ToString() const;
 
     /// Use for testing algo switch
