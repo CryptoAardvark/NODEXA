@@ -70,8 +70,10 @@ uint256 CBlockHeader::GetHashFull(uint256& mix_hash) const
         }
 
         return HashX16R(BEGIN(nVersion), END(nNonce), hashPrevBlock);
-    } else {
+    } else if (nHeight < nEquihashActivationHeight) {
         return KAWPOWHash(*this, mix_hash);
+    } else if (nHeight >= nEquihashActivationHeight) {
+        return 
     }
 }
 
@@ -96,6 +98,14 @@ uint256 CBlockHeader::GetX16RV2Hash() const
 uint256 CBlockHeader::GetKAWPOWHeaderHash() const
 {
     CKAWPOWInput input{*this};
+
+    return SerializeHash(input);
+}
+
+//define get equihash 
+uint256 CBlockHeader::GetEquihashHeaderHash() const
+{
+    CEquihashInput input{*this};
 
     return SerializeHash(input);
 }

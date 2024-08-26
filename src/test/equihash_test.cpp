@@ -4,7 +4,7 @@
 #include <uint256.h>
 #include <util/strencodings.h>
 
-#include <blake2.h>
+#include <crypto/blake/blake2.h>
 #include <set>
 #include <sstream>
 #include <vector>

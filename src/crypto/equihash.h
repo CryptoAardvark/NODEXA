@@ -12,7 +12,7 @@
 #include <crypto/sha256.h>
 #include <util/strencodings.h>
 
-#include "<blake2.h>"
+#include <crypto/blake/blake2.h>
 
 #include <cstring>
 #include <exception>

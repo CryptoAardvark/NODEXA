@@ -78,7 +78,6 @@ public:
             READWRITE(nNonce64);
             READWRITE(mix_hash);
         }
-        READWRITE(hashBlockCommitments);
         READWRITE(nSolution);
     }
 
@@ -94,7 +93,6 @@ public:
         nNonce64 = 0;
         nHeight = 0;
         mix_hash.SetNull();
-        hashBlockCommitments.SetNull();
         nSolution.clear()
     }
 
@@ -174,8 +172,6 @@ public:
         block.nHeight = nHeight;
         block.nNonce64 = nNonce64;
         block.mix_hash = mix_hash;
-        // Eqihash
-        block.hashBlockCommitments = hashBlockCommitments;
         return block;
     }
 
@@ -265,7 +261,6 @@ public:
         READWRITE(this->nVersion);
         READWRITE(hashPrevBlock);
         READWRITE(hashMerkleRoot);
-        READWRITE(hashBlockCommitments);
         READWRITE(nTime);
         READWRITE(nBits);
     }
