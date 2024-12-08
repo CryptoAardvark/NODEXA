@@ -11649,6 +11649,10 @@ static bool CheckBlockHeader(const CBlockHeader& block, CValidationState& state,
         }
     }
 
+    if (block.nHeight >= nEquihashActivationHeight){
+        //add todo
+    }
+
     uint256 mix_hash;
     // Check proof of work matches claimed amount
     if (fCheckPOW && !CheckProofOfWork(block.GetHashFull(mix_hash), block.nBits, consensusParams)) {
