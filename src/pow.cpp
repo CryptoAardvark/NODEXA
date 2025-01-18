@@ -14,6 +14,12 @@
 #include "validation.h"
 #include "chainparams.h"
 #include "tinyformat.h"
+#include "streams.h"
+#include "crypto/equihash.h"
+#include "crypto/blake/blake2.h"
+
+#include "algorithm"
+#include "iostream"
 
 unsigned int static DarkGravityWave(const CBlockIndex* pindexLast, const CBlockHeader *pblock, const Consensus::Params& params) {
     /* current difficulty formula, dash - DarkGravity v3, written by Evan Duffield - evan@dash.org */
@@ -22,7 +28,7 @@ unsigned int static DarkGravityWave(const CBlockIndex* pindexLast, const CBlockH
     unsigned int nProofOfWorkLimit = UintToArith256(params.powLimit).GetCompact();
     const arith_uint256 bnPowLimit = UintToArith256(params.powLimit);
     int64_t nPastBlocks = 180; // ~3hr
-
+         
     // make sure we have at least (nPastBlocks + 1) blocks, otherwise just return powLimit
     if (!pindexLast || pindexLast->nHeight < nPastBlocks) {
         return bnPowLimit.GetCompact();
@@ -48,6 +54,9 @@ unsigned int static DarkGravityWave(const CBlockIndex* pindexLast, const CBlockH
     arith_uint256 bnPastTargetAvg;
 
     int nKAWPOWBlocksFound = 0;
+    int nEquihashBlocksFound = 0; // Counter of Equihash blocks
+
+
     for (unsigned int nCountBlocks = 1; nCountBlocks <= nPastBlocks; nCountBlocks++) {
         arith_uint256 bnTarget = arith_uint256().SetCompact(pindex->nBits);
         if (nCountBlocks == 1) {
@@ -58,24 +67,38 @@ unsigned int static DarkGravityWave(const CBlockIndex* pindexLast, const CBlockH
         }
 
         // Count how blocks are KAWPOW mined in the last 180 blocks
-        if (pindex->nTime >= nKAWPOWActivationTime) {
+        if (pindex->nTime >= nKAWPOWActivationTime && pindex->nHeight < nEquihashActivationHeight) {
             nKAWPOWBlocksFound++;
         }
 
-        if(nCountBlocks != nPastBlocks) {
+        //Count how blocks are Equihash mined in the last 180 blocks
+        if (pindex->nHeight >= nEquihashActivationHeight){
+            nEquihashBlocksFound++;
+        }
+
+        if (nCountBlocks != nPastBlocks) {
             assert(pindex->pprev); // should never fail
             pindex = pindex->pprev;
         }
+
     }
 
     // If we are mining a KAWPOW block. We check to see if we have mined
     // 180 KAWPOW blocks already. If we haven't we are going to return our
     // temp limit. This will allow us to change algos to kawpow without having to
     // change the DGW math.
-    if (pblock->nTime >= nKAWPOWActivationTime) {
+    //Handle KAWPOW difficulty adjustment
+    if (pblock->nTime >= nKAWPOWActivationTime && pblock->nHeight < nEquihashActivationHeight) {
         if (nKAWPOWBlocksFound != nPastBlocks) {
             const arith_uint256 bnKawPowLimit = UintToArith256(params.kawpowLimit);
             return bnKawPowLimit.GetCompact();
+        }
+    }
+    //Handle Equihash difficulty adjustment
+    if (pblock->nHeight >= nEquihashActivationHeight){
+        if (nEquihashBlocksFound != nPastBlocks) {
+            const arith_uint256 bnEquihashLimit = UintToArith256(params.equihashLimit);
+            return bnEquihashLimit.GetCompact();
         }
     }
 
@@ -142,13 +165,13 @@ unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHead
 //    int64_t nPrevBlockTime = (pindexLast->pprev ? pindexLast->pprev->GetBlockTime() : pindexLast->GetBlockTime());  //<- Commented out - fixes "not used" warning
 
     if (IsDGWActive(pindexLast->nHeight + 1)) {
-//        LogPrint(BCLog::NET, "Block %s - version: %s: found next work required using DGW: [%s] (BTC would have been [%s]\t(%+d)\t(%0.3f%%)\t(%s sec))\n",
-//                 pindexLast->nHeight + 1, pblock->nVersion, dgw, btc, btc - dgw, (float)(btc - dgw) * 100.0 / (float)dgw, pindexLast->GetBlockTime() - nPrevBlockTime);
+    //    LogPrint(BCLog::NET, "Block %s - version: %s: found next work required using DGW: [%s] (BTC would have been [%s]\t(%+d)\t(%0.3f%%)\t(%s sec))\n",
+    //             pindexLast->nHeight + 1, pblock->nVersion, dgw, btc, btc - dgw, (float)(btc - dgw) * 100.0 / (float)dgw, pindexLast->GetBlockTime() - nPrevBlockTime);
         return DarkGravityWave(pindexLast, pblock, params);
     }
     else {
 //        LogPrint(BCLog::NET, "Block %s - version: %s: found next work required using BTC: [%s] (DGW would have been [%s]\t(%+d)\t(%0.3f%%)\t(%s sec))\n",
-//                  pindexLast->nHeight + 1, pblock->nVersion, btc, dgw, dgw - btc, (float)(dgw - btc) * 100.0 / (float)btc, pindexLast->GetBlockTime() - nPrevBlockTime);
+//          pindexLast->nHeight + 1, pblock->nVersion, btc, dgw, dgw - btc, (float)(dgw - btc) * 100.0 / (float)btc, pindexLast->GetBlockTime() - nPrevBlockTime);
         return GetNextWorkRequiredBTC(pindexLast, pblock, params);
     }
 
@@ -177,6 +200,39 @@ unsigned int CalculateNextWorkRequired(const CBlockIndex* pindexLast, int64_t nF
         bnNew = bnPowLimit;
 
     return bnNew.GetCompact();
+}
+
+//Check equihash solution
+bool CheckEquihashSolution(const CBlockHeader *pblock, const CChainParams& param){
+    int height = pblock->nHeight;
+    unsigned int n = params.EquihashN();
+    unsigned int k = params.EquihashK();
+
+    // Hash state
+    blake2b_state state;
+    EhInitialiseState(n, k, state, params.IsEquihashActive(height));
+
+    // I = the block header minus nonce and solution.
+    CEquihashInput I{*pblock};
+    // I||V
+    CDataStream ss(SER_NETWORK, PROTOCOL_VERSION);
+    ss << I;
+    ss << pblock->nNonce64;
+
+    // H(I||V||...
+    blake2b_update(&state, (unsigned char*)&ss[0], ss.size());
+
+    bool isValid;
+    EhIsValidSolution(n, k, state, pblock->nSolution, isValid);
+    return isValid;
+}
+
+//Check KawPow solution
+bool CheckKawpowSolution(const CBlockHeader& block, CValidationState& state, const Consensus::Params& consensusParams, bool fCheckPOW = true)
+{
+    bool is_vailid = true;
+    is_vailid = CheckBlockHeader(block, state, consensusParams, fCheckPOW);
+    return is_vailid;
 }
 
 bool CheckProofOfWork(uint256 hash, unsigned int nBits, const Consensus::Params& params)
